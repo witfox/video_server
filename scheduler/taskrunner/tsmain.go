@@ -13,16 +13,16 @@ func NewWorker(interval time.Duration, r *Runner) *Worker {
 		runner: r,
 	}
 }
-func (w *Worker) startWork()  {
+func (w *Worker) startWork() {
 	for {
 		select {
-		case <- w.ticker.C:
+		case <-w.ticker.C:
 			go w.runner.startAll()
 		}
 	}
 }
 
-func start()  {
+func Start() {
 	r := NewRunner(3, true, VideoClearDispatcher, VideoClearExecutor)
 	w := NewWorker(3, r)
 
