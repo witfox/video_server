@@ -3,8 +3,12 @@ package controller
 import (
 	"github.com/julienschmidt/httprouter"
 	"html/template"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"video_server/web/common"
+	"encoding/json"
 )
 
 type HomePage struct {
@@ -66,5 +70,23 @@ func UserHomeHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Param
 }
 
 func ApiHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params)  {
-	return
+	if r.Method != http.MethodPost {
+		m := common.ErrMsg("Bad Request", "001")
+		re, _ := json.Marshal(m)
+		io.WriteString(w, string(re))
+		return
+	}
+
+	res, _ := ioutil.ReadAll(r.Body)
+	apibody := &common.ApiBody{}
+	if err := json.Unmarshal(res, apibody); err != nil {
+		re, _ := json.Marshal(common.ErrMsg("read body error", "002"))
+		io.WriteString(w, string(re))
+		return
+	}
+
+	common.Request(apibody, w, r)
+
+	defer r.Body.Close()
+
 }
